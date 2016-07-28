@@ -15,6 +15,4 @@ import org.springframework.boot.context.embedded.MultipartConfigFactory;
 @Configuration
 public class Config {
 
-
-
 }

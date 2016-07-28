@@ -26,8 +26,6 @@ public class FaceRequestAgent {
     private static final String faceRESTAttr = "returnFaceId=true&returnFaceLandmarks=true";
     private static final String faceRESTAddr = faceRESTBaseUrl + faceRESTAttr;
 
-
-
     private static final HttpClient client = HttpClientBuilder.create().build();
 
     public static HttpResponse requestFaceAPI(String imageURL){

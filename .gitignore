@@ -46,3 +46,4 @@ build/
 *.log
 log/
 **/AccountInfo.java
+*.png
