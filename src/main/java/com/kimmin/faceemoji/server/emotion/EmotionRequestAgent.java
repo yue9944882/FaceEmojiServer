@@ -39,7 +39,6 @@ public class EmotionRequestAgent {
             ioe.printStackTrace();
             return null;
         }
-
     }
 
     public static HttpResponse requestEmotionAPI(File pngFile){

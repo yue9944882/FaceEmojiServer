@@ -37,7 +37,6 @@ public class StorageManager {
         try {
             CloudBlobContainer container = client.getContainerReference(username);
             container.createIfNotExists();
-
             UUID uuid = UUID.randomUUID();
             CloudBlockBlob blob = container.getBlockBlobReference(uuid.toString());
             blob.upload(stream, length);

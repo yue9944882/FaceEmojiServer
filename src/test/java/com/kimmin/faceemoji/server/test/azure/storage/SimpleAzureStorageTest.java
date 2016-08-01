@@ -39,6 +39,7 @@ public class SimpleAzureStorageTest {
             CloudBlockBlob blob = this.container.getBlockBlobReference("test_blob");
             String str = "Hello, Azure";
             blob.upload(new ByteArrayInputStream(str.getBytes()), str.getBytes().length);
+            System.out.println(blob.getStorageUri());
         }catch (Throwable e){
             e.printStackTrace();
         }

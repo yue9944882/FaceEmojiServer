@@ -12,8 +12,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,19 +36,23 @@ public class ImageController {
 
     @RequestMapping(value="/upload_image", method= RequestMethod.POST)
     @ResponseBody
-    public String handleImageUpload(@RequestParam("username") String username,
+    public void handleImageUpload(@RequestParam("username") String username,
+                                    HttpServletRequest request,
+                                    HttpServletResponse response,
                                     @RequestParam("file") MultipartFile file){
         try{
             byte[] bytes = file.getBytes();
             long length = bytes.length;
             String id = imageFileService.uploadImage(username, new ByteArrayInputStream(bytes), length);
-            Map map = new HashMap();
-            map.put("status", "success");
-            map.put("id", id);
-            return objectMapper.writeValueAsString(map);
+
+            OutputStream outputStream = response.getOutputStream();
+
+            imageFileService.transformImage(username, new ByteArrayInputStream(bytes), outputStream, length);
+
+            outputStream.flush();
+
         }catch (Throwable e){
             e.printStackTrace();
-            return null;
         }
 
     }
