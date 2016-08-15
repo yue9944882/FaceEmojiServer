@@ -28,18 +28,19 @@ import java.util.UUID;
 @Service
 public class ImageFileService {
 
-    public String uploadImage(String username, InputStream inputStream, long length){
-        String id = StorageManager.getInstance().saveImageToCloud(username, inputStream, length);
+    public String uploadImage(String username, InputStream inputStream, long length, String givenUuid){
+        String id = StorageManager.getInstance().saveImageToCloud(username, inputStream, length, givenUuid);
         return id;
     }
 
-    public void transformImage(String username, InputStream inputStream, OutputStream outputStream, long length){
+    public void transformImage(String username, InputStream inputStream, OutputStream outputStream, long length, String givenUuid){
         /** Save the image to Azure Storage **/
-        String id = StorageManager.getInstance().saveImageToCloud(username, inputStream, length);
+        String id = StorageManager.getInstance().saveImageToCloud(username, inputStream, length, givenUuid);
         String storageUri = AccountInfo.msAzureBlobEndpoint
-                + "/" + username + "/" + id;
+                + "/" + username + "/" + givenUuid;
         /** Begin Transforming Emojis **/
         try{
+            inputStream.reset();
             BufferedImage image = ImageIO.read(inputStream);
             int height = image.getHeight();
             int width = image.getWidth();
@@ -51,6 +52,7 @@ public class ImageFileService {
             List<EmotionResult> results = EmotionResponseParser.parseEmotionResult(content);
 
             /** Read uploaded binary image **/
+            inputStream.reset();
             BufferedImage targetImage = ImageIO.read(inputStream);
             URL urlSVG = null;
 
@@ -59,8 +61,8 @@ public class ImageFileService {
                 String emotion = null;
                 double score = Double.MIN_VALUE;
                 for(Field field : result.getClass().getFields()){
-                    if(field.getName().equals("width") && field.getName().equals("height")
-                            && field.getName().equals("left") && field.getName().equals("top")){
+                    if(!(field.getName().equals("width") || field.getName().equals("height")
+                            || field.getName().equals("left") || field.getName().equals("top"))){
                         double _score = field.getDouble(result);
                         if(score < _score){
                             score = _score;
@@ -69,16 +71,17 @@ public class ImageFileService {
                     }
                 }
                 if(emotion.equals("happiness")){
-                    urlSVG = Thread.currentThread().getContextClassLoader().getResource("happiness"
+                    urlSVG = Thread.currentThread().getContextClassLoader().getResource("emoji/happiness"
                         + new Double(Math.floor(result.happiness * 10 - 1)).intValue() + ".svg");
                 }else{
-                    urlSVG = Thread.currentThread().getContextClassLoader().getResource(emotion + ".svg");
+                    urlSVG = Thread.currentThread().getContextClassLoader().getResource("emoji/" + emotion + ".svg");
                 }
                 /** Transform SVG to PNG **/
                 PNGTranscoder pngTranscoder = new PNGTranscoder();
                 FileInputStream fileInputStream = new FileInputStream(new File(urlSVG.getPath()));
-                UUID uuid = UUID.randomUUID();
-                File emojiFile = new File(uuid.toString() + ".png");
+
+                String uuid = givenUuid == null ? UUID.randomUUID().toString() : givenUuid;
+                File emojiFile = new File(uuid + ".png");
                 FileOutputStream fileOutputStream = new FileOutputStream(emojiFile);
                 TranscoderInput input = new TranscoderInput(fileInputStream);
                 TranscoderOutput output = new TranscoderOutput(fileOutputStream);
@@ -87,13 +90,15 @@ public class ImageFileService {
                 pngTranscoder.transcode(input, output);
                 /** Overwrite PNG image via offset **/
                 BufferedImage emojiImage = ImageIO.read(emojiFile);
-                int[] emojiArray = emojiImage.getRGB(0, 0, width, height, null, 0, width);
-                for(int i=0; i<height; i++){
-                    for(int j=0; j<width; j++){
-                        int alpha = emojiArray[i * width + j] ^ 0x000000ff;
+                int targetWidth = emojiImage.getWidth();
+                int targetHeight = emojiImage.getHeight();
+                int[] emojiArray = emojiImage.getRGB(0, 0, targetWidth, targetHeight, null, 0, targetWidth);
+                for(int i=0; i<targetHeight; i++){
+                    for(int j=0; j<targetWidth; j++){
+                        int alpha = emojiArray[i * targetWidth + j] ^ 0x000000ff;
                         if(alpha <0){
                             /** Why < 0? I dont know either... **/
-                            targetImage.setRGB((result.left + j), result.top + i, emojiArray[i * width + j]);
+                            targetImage.setRGB((result.left + j), result.top + i, emojiArray[i * targetWidth + j]);
                         }
                     }
                 }

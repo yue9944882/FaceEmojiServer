@@ -2,9 +2,7 @@ package com.kimmin.faceemoji.server.storage;
 
 import com.kimmin.faceemoji.server.constant.AccountInfo;
 import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
+import com.microsoft.azure.storage.blob.*;
 
 import java.io.InputStream;
 import java.util.UUID;
@@ -33,20 +31,36 @@ public class StorageManager {
     private CloudStorageAccount account = null;
     private CloudBlobClient client = null;
 
-    public String saveImageToCloud(String username, InputStream stream, long length){
+    public String saveImageToCloud(String username, InputStream stream, long length, String givenUuid){
         try {
             CloudBlobContainer container = client.getContainerReference(username);
-            container.createIfNotExists();
-            UUID uuid = UUID.randomUUID();
-            CloudBlockBlob blob = container.getBlockBlobReference(uuid.toString());
+            boolean newed = false;
+            while(!container.exists()) {
+                newed = container.createIfNotExists();
+            }
+            if(newed){
+                BlobContainerPermissions p = container.downloadPermissions();
+                while(! p.getPublicAccess().equals(BlobContainerPublicAccessType.CONTAINER)) {
+                    BlobContainerPermissions permissions = new BlobContainerPermissions();
+                    permissions.setPublicAccess(BlobContainerPublicAccessType.CONTAINER);
+                    container.uploadPermissions(permissions);
+                    p = container.downloadPermissions();
+                }
+            }
+            String uuid = givenUuid == null ? UUID.randomUUID().toString() : givenUuid;
+            CloudBlockBlob blob = container.getBlockBlobReference(uuid);
+            blob.getProperties().setContentType("image/png");
             blob.upload(stream, length);
-            return uuid.toString();
+            return blob.getStorageUri().getPrimaryUri().toString();
         }catch (Throwable e){
             e.printStackTrace();
             return null;
         }
     }
 
+    public void updatePermissionOfContainer(String containerName){
+
+    }
 
 
 }

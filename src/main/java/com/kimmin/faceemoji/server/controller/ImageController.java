@@ -2,59 +2,75 @@ package com.kimmin.faceemoji.server.controller;
 
 import com.kimmin.faceemoji.server.service.ImageFileService;
 import com.kimmin.faceemoji.server.storage.StorageManager;
+import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by kimmin on 7/19/16.
  */
 
 @Controller
+@RequestMapping(value = "/image", method = RequestMethod.POST)
 @MultipartConfig(maxFileSize = 4 * 1024 * 1024)
 public class ImageController {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    ImageFileService imageFileService;
+    private ImageFileService imageFileService;
 
 
-    @RequestMapping(value="/upload_image", method= RequestMethod.POST)
+    @RequestMapping(value="/upload/{username}", method= RequestMethod.POST)
     @ResponseBody
-    public void handleImageUpload(@RequestParam("username") String username,
+    public String handleImageUpload(@PathVariable("username") String username,
                                     HttpServletRequest request,
                                     HttpServletResponse response,
                                     @RequestParam("file") MultipartFile file){
         try{
             byte[] bytes = file.getBytes();
             long length = bytes.length;
-            String id = imageFileService.uploadImage(username, new ByteArrayInputStream(bytes), length);
 
-            OutputStream outputStream = response.getOutputStream();
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-            imageFileService.transformImage(username, new ByteArrayInputStream(bytes), outputStream, length);
+            String uuid = UUID.randomUUID().toString();
 
-            outputStream.flush();
+            imageFileService.transformImage(username, new ByteArrayInputStream(bytes), os, length, uuid);
+
+            os.flush();
+
+            ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
+
+            String uri = imageFileService.uploadImage("p" + username, is, os.size(), uuid);
+
+            os.close();
+            is.close();
+
+            return uri;
 
         }catch (Throwable e){
             e.printStackTrace();
+            return null;
         }
 
+    }
+
+
+    @RequestMapping(value = "/echo", method = RequestMethod.POST)
+    @ResponseBody
+    public String echoHandler(){
+        return "echo";
     }
 
 
