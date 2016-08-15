@@ -1,5 +1,6 @@
 package com.kimmin.faceemoji.server.controller;
 
+import com.kimmin.faceemoji.server.constant.Util;
 import com.kimmin.faceemoji.server.service.ImageFileService;
 import com.kimmin.faceemoji.server.storage.StorageManager;
 import org.apache.commons.io.IOUtils;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -61,7 +63,7 @@ public class ImageController {
 
         }catch (Throwable e){
             e.printStackTrace();
-            return null;
+            return Util.RESP_FAILURE;
         }
 
     }
@@ -74,6 +76,27 @@ public class ImageController {
     }
 
 
+    @RequestMapping(value = "/enum/{username}", method = RequestMethod.POST)
+    @ResponseBody
+    public String enumAllPhoto(@PathVariable("username") String username){
+        List<String> list = StorageManager.getInstance().getPhotoByOwner(username);
+        try{
+            return objectMapper.writeValueAsString(list);
+        }catch (Throwable e){
+            e.printStackTrace();
+            return Util.RESP_FAILURE;
+        }
+    }
+
+    @RequestMapping(value = "/delete/{username}", method = RequestMethod.POST)
+    @ResponseBody
+    public String deletePhoto(@PathVariable("username") String username,
+                              @RequestBody Map<String, Object> map){
+        String key = (String) map.get("key");
+        if(key == null) return Util.RESP_FAILURE;
+        StorageManager.getInstance().deletePhoto(username, key);
+        return Util.RESP_SUCCESS;
+    }
 
 
 

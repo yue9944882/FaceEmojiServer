@@ -5,6 +5,9 @@ import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.*;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
@@ -58,8 +61,35 @@ public class StorageManager {
         }
     }
 
-    public void updatePermissionOfContainer(String containerName){
 
+    public List<String> getPhotoByOwner(String username){
+        try{
+            List<String> uris = new ArrayList<String>();
+            CloudBlobContainer pcontainer = client.getContainerReference("p" + username);
+            Iterator<ListBlobItem> iter = pcontainer.listBlobs().iterator();
+            while(iter.hasNext()){
+                ListBlobItem blobItem = iter.next();
+                uris.add(blobItem.getStorageUri().getPrimaryUri().toString());
+            }
+            return uris;
+        }catch (Throwable e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    public void deletePhoto(String username, String key){
+        try{
+            CloudBlobContainer pcontainer = client.getContainerReference("p" + username);
+            CloudBlobContainer container = client.getContainerReference(username);
+            CloudBlockBlob pblob = pcontainer.getBlockBlobReference(key);
+            CloudBlockBlob blob = container.getBlockBlobReference(key);
+            pblob.deleteIfExists();
+            blob.deleteIfExists();
+        }catch (Throwable e){
+            e.printStackTrace();
+        }
     }
 
 
