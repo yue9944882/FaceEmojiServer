@@ -102,6 +102,7 @@ public class ImageFileService {
                         }
                     }
                 }
+                emojiFile.delete();
             }
             ImageIO.write(targetImage, "png", outputStream);
             outputStream.flush();
