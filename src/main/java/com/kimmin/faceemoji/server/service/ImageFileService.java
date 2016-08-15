@@ -5,7 +5,6 @@ import com.kimmin.faceemoji.server.emotion.EmotionRequestAgent;
 import com.kimmin.faceemoji.server.emotion.EmotionResponseParser;
 import com.kimmin.faceemoji.server.emotion.EmotionResult;
 import com.kimmin.faceemoji.server.storage.StorageManager;
-import com.sun.tools.doclets.internal.toolkit.util.DocFinder;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
