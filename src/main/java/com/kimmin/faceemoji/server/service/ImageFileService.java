@@ -73,7 +73,7 @@ public class ImageFileService {
                 }
                 Resource resource = null;
                 if(emotion.equals("happiness")){
-                    resource = new ClassPathResource("emoji/happiness"
+                    resource = new ClassPathResource("emoji/Happiness"
                             + new Double(Math.floor(result.happiness * 10 - 1)).intValue() + ".svg");
                 }else{
                     resource = new ClassPathResource("emoji/" + emotion + ".svg");
