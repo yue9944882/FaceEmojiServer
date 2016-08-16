@@ -9,6 +9,8 @@ import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.apache.http.HttpResponse;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -69,15 +71,16 @@ public class ImageFileService {
                         }
                     }
                 }
+                Resource resource = null;
                 if(emotion.equals("happiness")){
-                    urlSVG = Thread.currentThread().getContextClassLoader().getResource("emoji/happiness"
-                        + new Double(Math.floor(result.happiness * 10 - 1)).intValue() + ".svg");
+                    resource = new ClassPathResource("emoji/happiness"
+                            + new Double(Math.floor(result.happiness * 10 - 1)).intValue() + ".svg");
                 }else{
-                    urlSVG = Thread.currentThread().getContextClassLoader().getResource("emoji/" + emotion + ".svg");
+                    resource = new ClassPathResource("emoji/" + emotion + ".svg");
                 }
                 /** Transform SVG to PNG **/
                 PNGTranscoder pngTranscoder = new PNGTranscoder();
-                FileInputStream fileInputStream = new FileInputStream(new File(urlSVG.getPath()));
+                FileInputStream fileInputStream = new FileInputStream(resource.getFile());
 
                 String uuid = givenUuid == null ? UUID.randomUUID().toString() : givenUuid;
                 File emojiFile = new File(uuid + ".png");
