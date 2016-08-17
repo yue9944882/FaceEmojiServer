@@ -36,7 +36,6 @@ public class ImageFileService {
 
     public void transformImage(String username, InputStream inputStream, OutputStream outputStream, long length, String givenUuid){
         /** Save the image to Azure Storage **/
-        String id = StorageManager.getInstance().saveImageToCloud(username, inputStream, length, givenUuid);
         String storageUri = AccountInfo.msAzureBlobEndpoint
                 + "/" + username + "/" + givenUuid;
         /** Begin Transforming Emojis **/
@@ -51,7 +50,8 @@ public class ImageFileService {
             resp.getEntity().getContent().read(bytes);
             String content = new String(bytes);
             List<EmotionResult> results = EmotionResponseParser.parseEmotionResult(content);
-
+            inputStream.reset();
+            String id = StorageManager.getInstance().saveImageToCloud(username, inputStream, length, givenUuid);
             /** Read uploaded binary image **/
             inputStream.reset();
             BufferedImage targetImage = ImageIO.read(inputStream);
