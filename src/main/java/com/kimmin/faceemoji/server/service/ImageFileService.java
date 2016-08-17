@@ -40,6 +40,7 @@ public class ImageFileService {
                 + "/" + username + "/" + givenUuid;
         /** Begin Transforming Emojis **/
         try{
+            String id = StorageManager.getInstance().saveImageToCloud(username, inputStream, length, givenUuid);
             inputStream.reset();
             BufferedImage image = ImageIO.read(inputStream);
             int height = image.getHeight();
@@ -50,8 +51,6 @@ public class ImageFileService {
             resp.getEntity().getContent().read(bytes);
             String content = new String(bytes);
             List<EmotionResult> results = EmotionResponseParser.parseEmotionResult(content);
-            inputStream.reset();
-            String id = StorageManager.getInstance().saveImageToCloud(username, inputStream, length, givenUuid);
             /** Read uploaded binary image **/
             inputStream.reset();
             BufferedImage targetImage = ImageIO.read(inputStream);
@@ -108,6 +107,8 @@ public class ImageFileService {
             }
             ImageIO.write(targetImage, "png", outputStream);
             outputStream.flush();
+            inputStream.close();
+            outputStream.close();
         }catch (Throwable e){
             e.printStackTrace();
         }

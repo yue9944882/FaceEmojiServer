@@ -23,9 +23,9 @@ public class EmotionRequestAgent {
     private static final String emotionRESTAttr = "";
     private static final String emotionRESTAddr = emotionRESTBaseUrl + emotionRESTAttr;
 
-    private static final HttpClient client = HttpClientBuilder.create().build();
 
     public static HttpResponse requestEmotionAPI(String imageURL){
+        HttpClient client = HttpClientBuilder.create().build();
         HttpPost post = new HttpPost(emotionRESTAddr);
         post.addHeader("Content-Type", "application/json");
         post.addHeader("Ocp-Apim-Subscription-Key", AccountInfo.msEmotionSubscriptionKey);
@@ -43,6 +43,7 @@ public class EmotionRequestAgent {
 
     public static HttpResponse requestEmotionAPI(File pngFile){
         try {
+            HttpClient client = HttpClientBuilder.create().build();
             HttpPost post = new HttpPost(emotionRESTAddr);
             post.addHeader("Content-Type", "application/octet-stream");
             post.addHeader("Ocp-Apim-Subscription-Key", AccountInfo.msEmotionSubscriptionKey);
