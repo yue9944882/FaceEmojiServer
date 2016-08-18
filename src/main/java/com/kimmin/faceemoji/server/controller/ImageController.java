@@ -6,6 +6,7 @@ import com.kimmin.faceemoji.server.storage.StorageManager;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,7 @@ import java.util.UUID;
  */
 
 @Controller
-@RequestMapping(value = "/image", method = RequestMethod.POST)
+@RequestMapping(value = "/image", method = { RequestMethod.POST, RequestMethod.GET })
 @MultipartConfig(maxFileSize = 4 * 1024 * 1024)
 public class ImageController {
 
@@ -36,6 +37,7 @@ public class ImageController {
 
 
     @RequestMapping(value="/upload/{username}", method= RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public String handleImageUpload(@PathVariable("username") String username,
                                     HttpServletRequest request,
