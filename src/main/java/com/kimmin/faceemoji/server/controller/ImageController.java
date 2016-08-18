@@ -39,6 +39,7 @@ public class ImageController {
     @RequestMapping(value="/upload/{username}", method= RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
+    @CrossOrigin
     public String handleImageUpload(@PathVariable("username") String username,
                                     HttpServletRequest request,
                                     HttpServletResponse response,
