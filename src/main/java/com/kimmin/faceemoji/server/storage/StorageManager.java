@@ -5,10 +5,7 @@ import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.*;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -74,7 +71,7 @@ public class StorageManager {
             return uris;
         }catch (Throwable e){
             e.printStackTrace();
-            return null;
+            return new LinkedList();
         }
     }
 
