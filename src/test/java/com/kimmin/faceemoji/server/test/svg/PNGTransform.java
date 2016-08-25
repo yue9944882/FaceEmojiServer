@@ -43,8 +43,8 @@ public class PNGTransform {
             String content = new String(bytes);
             List<EmotionResult> results = EmotionResponseParser.parseEmotionResult(content);
             for(EmotionResult result : results){
-                pngTranscoder.addTranscodingHint(PNGTranscoder.KEY_WIDTH, new Integer(result.width).floatValue());
-                pngTranscoder.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, new Integer(result.height).floatValue());
+                pngTranscoder.addTranscodingHint(PNGTranscoder.KEY_WIDTH, new Float(new Integer(result.width).floatValue() * 1.828));
+                pngTranscoder.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, new Float(new Integer(result.height).floatValue() * 1.828));
                 TranscoderInput input = new TranscoderInput(new FileInputStream(new File(urlSVG.getPath())));
                 OutputStream os = new FileOutputStream("test.png");
                 TranscoderOutput output = new TranscoderOutput(os);
@@ -52,22 +52,27 @@ public class PNGTransform {
                 os.flush();
                 os.close();
                 BufferedImage emojiImage = ImageIO.read(new FileInputStream("test.png"));
+                float l = 1.414f;
                 int height = emojiImage.getHeight();
                 int width = emojiImage.getWidth();
                 // ARGB Array
                 int[] emojiArray = emojiImage.getRGB(0, 0, width, height, null, 0, width);
                 BufferedImage targetImage = ImageIO.read(new FileInputStream(new File(urlImage.getPath())));
                 int type = emojiImage.getType();
+                int fakeleft = new Float(result.left - result.width * 0.414f).intValue();
+                int faketop = new Float(result.top - result.height * 0.414f).intValue();
                 for(int i=0; i<height; i++){
                     for(int j=0; j<width; j++){
                         int alpha = emojiArray[i * width + j] ^ 0x000000ff;
                         if(alpha <0){
                             /** Why < 0? I dont know either... **/
-                            targetImage.setRGB((result.left + j), result.top + i, emojiArray[i * width + j]);
+                            if(fakeleft + j > 0 && faketop + i > 0) {
+                                targetImage.setRGB((fakeleft + j), faketop + i, emojiArray[i * width + j]);
+                            }
                         }
                     }
                 }
-                ImageIO.write(targetImage, "png", new File("testOutput.png"));
+                ImageIO.write(targetImage, "png", new File("testOutput1.png"));
             }
         }catch (Throwable e){
             e.printStackTrace();

@@ -36,7 +36,7 @@ public class AuthController {
         }
     }
 
-    @RequestMapping(value = "register", method = RequestMethod.POST)
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public String registerUser(@RequestBody Map<String, Object> content){
         String username = (String) content.get("username");
