@@ -3,6 +3,9 @@ package com.kimmin.faceemoji.server.test.svg;
 import com.kimmin.faceemoji.server.emotion.EmotionRequestAgent;
 import com.kimmin.faceemoji.server.emotion.EmotionResponseParser;
 import com.kimmin.faceemoji.server.emotion.EmotionResult;
+import com.kimmin.faceemoji.server.face.FaceRequestAgent;
+import com.kimmin.faceemoji.server.face.FaceResponseParser;
+import com.kimmin.faceemoji.server.face.FaceResult;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
@@ -32,19 +35,20 @@ public class PNGTransform {
         URL urlImage = Thread.currentThread().getContextClassLoader().getResource("naiveblue.png");
         URL urlSVG = Thread.currentThread().getContextClassLoader().getResource("Anger.svg");
 
-        HttpResponse resp = EmotionRequestAgent.requestEmotionAPI(new File(urlImage.getPath()));
+        HttpResponse resp = FaceRequestAgent.requestFaceAPI(new File(urlImage.getPath()));
 
         long length = resp.getEntity().getContentLength();
 
         byte[] bytes = new byte[(int) length];
 
         try {
+
             resp.getEntity().getContent().read(bytes);
             String content = new String(bytes);
-            List<EmotionResult> results = EmotionResponseParser.parseEmotionResult(content);
-            for(EmotionResult result : results){
-                pngTranscoder.addTranscodingHint(PNGTranscoder.KEY_WIDTH, new Float(new Integer(result.width).floatValue() * 1.828));
-                pngTranscoder.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, new Float(new Integer(result.height).floatValue() * 1.828));
+            List<FaceResult> results = FaceResponseParser.parseFaceResult(content);
+            for(FaceResult result : results){
+                pngTranscoder.addTranscodingHint(PNGTranscoder.KEY_WIDTH, new Float(new Integer(result.width).floatValue()));
+                pngTranscoder.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, new Float(new Integer(result.height).floatValue()));
                 TranscoderInput input = new TranscoderInput(new FileInputStream(new File(urlSVG.getPath())));
                 OutputStream os = new FileOutputStream("test.png");
                 TranscoderOutput output = new TranscoderOutput(os);
